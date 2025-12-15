@@ -1,8 +1,12 @@
 #!/usr/bin/env node
+import "dotenv/config";
 import { Command } from "commander";
+import { connectDB, disconnectDB } from "./db/connection.js";
 import { registerGetCommand } from "./commands/get.js";
 import { registerSearchCommand } from "./commands/search.js";
 import { registerRandomCommand } from "./commands/random.js";
+
+await connectDB();
 
 const program = new Command();
 
@@ -16,4 +20,6 @@ registerSearchCommand(program)
 registerRandomCommand(program)
 
 
-program.parse(process.argv);
+await program.parseAsync(process.argv);
+
+await disconnectDB()
