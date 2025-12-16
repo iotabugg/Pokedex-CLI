@@ -13,7 +13,7 @@ export async function getPokemon(identifier){
     });
 
     if(cached){
-        console.log("Cache hit")
+        // console.log("Cache hit")
         return cached.data;
     } 
 
