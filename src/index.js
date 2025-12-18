@@ -3,6 +3,8 @@ import "dotenv/config";
 import { Command } from "commander";
 import { getPokemonCli } from "./cli/commands/get.js";
 import { addFavorite, listFavorites } from "./cli/commands/fav.js";
+import { randomPokemon } from "./cli/commands/random.js";
+import { searchPokemon } from "./cli/commands/search.js";
 
 const program = new Command();
 
@@ -15,6 +17,14 @@ program
     .command("get <identifier>")
     .description("Get details of a pokemon by it's Name or Id")
     .action(getPokemonCli)
+program
+    .command("random")
+    .description("Get a random pokemon.")
+    .action(randomPokemon)
+program
+    .command("search <query>")
+    .description("search Pokemon by name.")
+    .action(searchPokemon)
 
 const favCommand = program
     .command("fav")

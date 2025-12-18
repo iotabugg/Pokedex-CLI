@@ -20,6 +20,76 @@ export async function startServer() {
         res.json({ status: "ok" })
     })
 
+    let pokemonListCache = null;
+
+    app.get("/search", async (req, res) => {
+        const { q } = req.query;
+        console.log("SEARCH HIT, q =", q);
+
+        if (!q) {
+            return res.status(400).json({ error: "q is required" });
+        }
+
+        const query = q.toLowerCase();
+
+        try {
+            // 1️⃣ Try exact match first (keeps current behavior)
+            try {
+                const pokemon = await getPokemon(query);
+
+                // 🔴 IMPORTANT FIX: handle "not found" that does NOT throw
+                if (!pokemon) {
+                    throw new Error("POKEMON_NOT_FOUND");
+                }
+
+                return res.json([pokemon]);
+            } catch (err) {
+                console.log("Exact match failed, doing partial search");
+
+                if (
+                    err.response?.status !== 404 &&
+                    err.message !== "POKEMON_NOT_FOUND"
+                ) {
+                    throw err;
+                }
+            }
+
+            // 2️⃣ Load pokemon list once (for partial search)
+            if (!pokemonListCache) {
+                const listRes = await axios.get(
+                    "https://pokeapi.co/api/v2/pokemon?limit=1017"
+                );
+                pokemonListCache = listRes.data.results;
+            }
+
+            // 3️⃣ Partial + case-insensitive match
+            const matches = pokemonListCache
+                .filter(p => p.name.includes(query))
+                .slice(0, 10);
+
+            if (matches.length === 0) {
+                return res.json([]);
+            }
+
+            // 4️⃣ Fetch full data for matches
+            const results = await Promise.allSettled(
+                matches.map(p => getPokemon(p.name))
+            );
+
+            const detailed = results
+                .filter(r => r.status === "fulfilled")
+                .map(r => r.value);
+
+            res.json(detailed);
+
+        } catch (err) {
+            console.error("Search failed:", err.message);
+            res.status(500).json({ error: "Search failed" });
+        }
+    });
+
+
+
     app.get("/pokemon/:identifier", async (req, res) => {
         try {
             const pokemon = await getPokemon(req.params.identifier);
@@ -43,6 +113,7 @@ export async function startServer() {
             res.status(500).json({ error: "Failed to fetch favorites" })
         }
     })
+
 
     app.post("/favorites", async (req, res) => {
         try {
