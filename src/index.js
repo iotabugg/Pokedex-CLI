@@ -1,12 +1,8 @@
 #!/usr/bin/env node
 import "dotenv/config";
 import { Command } from "commander";
-import { connectDB, disconnectDB } from "./db/connection.js";
-import { registerGetCommand } from "./commands/get.js";
-import { registerSearchCommand } from "./commands/search.js";
-import { registerRandomCommand } from "./commands/random.js";
-
-await connectDB();
+import { getPokemonCli } from "./cli/commands/get.js";
+import { addFavorite, listFavorites } from "./cli/commands/fav.js";
 
 const program = new Command();
 
@@ -15,11 +11,23 @@ program
     .description("CLI tool to explore pokemon data")
     .version("1.0.0");
 
-registerGetCommand(program)
-registerSearchCommand(program)
-registerRandomCommand(program)
+program
+    .command("get <identifier>")
+    .description("Get details of a pokemon by it's Name or Id")
+    .action(getPokemonCli)
+
+const favCommand = program
+    .command("fav")
+    .description("Manage favorite Pokemon")
+favCommand
+  .command("add <identifier>")
+  .description("Add a Pokémon to favorites")
+  .action(addFavorite);
+
+favCommand
+  .command("list")
+  .description("List favorite Pokémon")
+  .action(listFavorites);
 
 
 await program.parseAsync(process.argv);
-
-await disconnectDB()

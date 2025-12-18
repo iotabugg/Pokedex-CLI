@@ -19,5 +19,5 @@ export async function addFavorite(identifier) {
 
 export async function getFavorite() {
     const favorites = await Favorite.find({}, {_id: 0, data: 1})
-    return favorites.map(f => f.data.name)
+    return favorites.map(f => f.data)
 }
