@@ -1,22 +1,22 @@
 import { api } from "../httpClient.js";
-import chalk from "chalk";
+import { formatPokemon } from "../formatters/pokemonFormatter.js";
+const isInteractive = process.argv.length <= 2;
+export async function randomPokemon(options) {
+    try {
+        const MAX_POKEMON_ID = 1017;
 
-export async function randomPokemon() {
-  try {
-    const MAX_POKEMON_ID = 1017;
+        const randomId =
+            Math.floor(Math.random() * MAX_POKEMON_ID) + 1;
 
-    const randomId =
-      Math.floor(Math.random() * MAX_POKEMON_ID) + 1;
+        const res = await api.get(`/pokemon/${randomId}`);
+        if (options.json) {
+            console.log(JSON.stringify(res.data, null, 2));
+            return;
+        }
 
-    const res = await api.get(`/pokemon/${randomId}`);
-    const pokemon = res.data;
-
-        console.log(chalk.green.bold(pokemon.name.toUpperCase()));
-        console.log("ID: ", pokemon.id);
-        console.log("Types: ", pokemon.types.join(", "))
-        console.log("Abilities: ", pokemon.abilities.join(", "))
-  } catch (err) {
-    console.error("Failed to fetch random Pokémon.");
-    process.exit(1);
-  }
+        formatPokemon(res.data);
+    } catch (err) {
+        console.error("Failed to fetch random Pokémon.");
+        if(!isInteractive) process.exit(1);
+    }
 }

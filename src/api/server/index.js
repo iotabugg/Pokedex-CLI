@@ -6,6 +6,7 @@ import {
     addFavorite,
     getFavorite
 } from "../../services/favoriteService.js";
+import axios from "axios";
 
 export async function startServer() {
     await connectDB();
@@ -57,15 +58,14 @@ export async function startServer() {
             // 2️⃣ Load pokemon list once (for partial search)
             if (!pokemonListCache) {
                 const listRes = await axios.get(
-                    "https://pokeapi.co/api/v2/pokemon?limit=1017"
+                    "https://pokeapi.co/api/v2/pokemon?limit=2000"
                 );
                 pokemonListCache = listRes.data.results;
             }
 
             // 3️⃣ Partial + case-insensitive match
             const matches = pokemonListCache
-                .filter(p => p.name.includes(query))
-                .slice(0, 10);
+                .filter(p => p.name.startsWith(query))
 
             if (matches.length === 0) {
                 return res.json([]);
