@@ -25,7 +25,6 @@ export async function startServer() {
 
     app.get("/search", async (req, res) => {
         const { q } = req.query;
-        console.log("SEARCH HIT, q =", q);
 
         if (!q) {
             return res.status(400).json({ error: "q is required" });

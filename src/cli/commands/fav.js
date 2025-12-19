@@ -1,9 +1,20 @@
 import { api } from "../httpClient.js";
 import { formatPokemonList } from "../formatters/pokemonFormatter.js";
 import chalk from "chalk";
+import { program } from "../../index.js";
+
 
 async function addFavorite(identifier) {
+    const session = program.session
     try {
+        if(!identifier && session) {
+            if(!session.lastPokemon) {
+                console.error(chalk.red.bold("No pokemon in context. Use 'get' or 'ramdom' command to see a pokemon."))
+                return
+            }
+            identifier = session.lastPokemon.name
+        }
+
         const response = await api.post("/favorites", {
             identifier
         });

@@ -1,7 +1,11 @@
 import { api } from "../httpClient.js";
 import { formatPokemon } from "../formatters/pokemonFormatter.js";
+import { program } from "../../index.js";
+
+
 const isInteractive = process.argv.length <= 2;
 export async function randomPokemon(options) {
+    const session = program.session
     try {
         const MAX_POKEMON_ID = 1017;
 
@@ -9,6 +13,10 @@ export async function randomPokemon(options) {
             Math.floor(Math.random() * MAX_POKEMON_ID) + 1;
 
         const res = await api.get(`/pokemon/${randomId}`);
+        if (session) {
+            session.lastPokemon = res.data;
+        }
+
         if (options.json) {
             console.log(JSON.stringify(res.data, null, 2));
             return;
@@ -16,7 +24,8 @@ export async function randomPokemon(options) {
 
         formatPokemon(res.data);
     } catch (err) {
+        console.error(err.message);
         console.error("Failed to fetch random Pokémon.");
-        if(!isInteractive) process.exit(1);
+        if (!isInteractive) process.exit(1);
     }
 }

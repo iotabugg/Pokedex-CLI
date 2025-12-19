@@ -34,7 +34,7 @@ const favCommand = program
     .command("fav")
     .description("Manage favorite Pokemon")
 favCommand
-  .command("add <identifier>")
+  .command("add [identifier]")
   .description("Add a Pokémon to favorites")
   .option("--json", "Output raw JSON")
   .action(addFavorite);
