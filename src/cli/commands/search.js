@@ -1,16 +1,22 @@
-import { api } from "../httpClient.js";
+import { getApiClient } from "../httpClient.js";
 import { formatPokemonList } from "../formatters/pokemonFormatter.js";
+import { getConfig } from "../../config/runtimeConfig.js";
 
 const isInteractive = process.argv.length <= 2;
 export async function searchPokemon(query, options) {
     try {
+        const config = getConfig()
+        const api = getApiClient()
         const res = await api.get('/search', {
             params: { q: query }
         });
         // console.log("step 1 complete.")
-        if (options.json) {
-            console.log(JSON.stringify(res.data, null, 2));
-            return;
+        const output =
+            options.json
+                ? "json" : config.output
+        if (output === "json") {
+            console.log(JSON.stringify(res.data, null, 2))
+            return
         }
 
         console.log(`Search results for "${query}":`);
@@ -18,6 +24,6 @@ export async function searchPokemon(query, options) {
     } catch (err) {
         console.log(err)
         console.error("Search failed.");
-        if(!isInteractive) process.exit(1);
+        if (!isInteractive) process.exit(1);
     }
 }

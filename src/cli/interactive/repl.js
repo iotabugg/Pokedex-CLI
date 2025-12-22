@@ -1,6 +1,7 @@
 import readline from "node:readline"
 import { program } from "../../index.js"
 import chalk from "chalk"
+import { initSession } from "../../config/runtimeSession.js" 
 
 export function startRepl() {
     const rl = readline.createInterface({
@@ -8,9 +9,9 @@ export function startRepl() {
         output: process.stdout,
         prompt: "pokedex> "
     })
-    const session = {
-        lastPokemon: null
-    }
+
+    const session = initSession()
+    
     program.session = session
     console.log("Welcome to Pokedex Interactive Mode")
     console.log("Type 'help' to see available commands.")

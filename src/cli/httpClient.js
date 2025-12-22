@@ -1,8 +1,14 @@
 import axios from "axios";
+import { getConfig } from "../config/runtimeConfig.js";
 
-const API_BASE_URL = process.env.POKEDEX_API_URL || "http://localhost:3000";
+export function getApiClient() {
+  const { apiBaseUrl } = getConfig() 
 
-export const api = axios.create({
-  baseURL: API_BASE_URL,
-  timeout: 5000
-});
+  if(!apiBaseUrl.startsWith("http")) {
+    throw new Error("Invalid apiBaseUrl in config")
+  }
+
+  return axios.create({
+    baseURL : apiBaseUrl
+  })
+}

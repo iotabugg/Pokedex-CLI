@@ -33,11 +33,9 @@ export async function startServer() {
         const query = q.toLowerCase();
 
         try {
-            // 1️⃣ Try exact match first (keeps current behavior)
             try {
                 const pokemon = await getPokemon(query);
 
-                // 🔴 IMPORTANT FIX: handle "not found" that does NOT throw
                 if (!pokemon) {
                     throw new Error("POKEMON_NOT_FOUND");
                 }
@@ -82,7 +80,6 @@ export async function startServer() {
             res.json(detailed);
 
         } catch (err) {
-            console.error("Search failed:", err.message);
             res.status(500).json({ error: "Search failed" });
         }
     });

@@ -1,21 +1,27 @@
-import { api } from "../httpClient.js";
+import { getApiClient } from "../httpClient.js";
 import { formatPokemon } from "../formatters/pokemonFormatter.js";
-import { program } from "../../index.js";
-
+import { getConfig } from "../../config/runtimeConfig.js";
+import { getSession } from "../../config/runtimeSession.js";
 
 const isInteractive = process.argv.length <= 2;
 
 export async function getPokemonCli(identifier, options) {
-    const session = program.session
     try {
+        const session = getSession()
+        const config = getConfig()
+        const api = getApiClient();
         const res = await api.get(`/pokemon/${identifier}`);
         if (session) {
             session.lastPokemon = res.data
         }
+        const output =
+            options?.json === true || config.output === "json"
+                ? "json"
+                : "pretty";
 
-        if (options.json) {
-            console.log(JSON.stringify(res.data, null, 2))
-            return
+        if (output === "json") {
+            console.log(JSON.stringify(res.data, null, 2));
+            return;
         }
         formatPokemon(res.data)
 

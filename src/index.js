@@ -6,8 +6,14 @@ import { addFavorite, listFavorites } from "./cli/commands/fav.js";
 import { randomPokemon } from "./cli/commands/random.js";
 import { searchPokemon } from "./cli/commands/search.js";
 import { startRepl } from "./cli/interactive/repl.js";
+import { loadConfig } from "./config/configManager.js";
+import { setConfig } from "./config/runtimeConfig.js";
 
 export const program = new Command();
+
+const config = loadConfig()
+setConfig(config)
+program.config = config
 
 program
     .name("pokedex")
@@ -45,9 +51,13 @@ favCommand
   .option("--json", "Output raw JSON")
   .action(listFavorites);
 
-if(process.argv.length <= 2) {
+const shouldStartRepl = 
+    process.argv.length <= 2 &&
+    program.config.interactive
+
+if(shouldStartRepl) {
     startRepl();
 } else {
-    program.parseAsync(process.argv);
+    await program.parseAsync(process.argv);
 }
 

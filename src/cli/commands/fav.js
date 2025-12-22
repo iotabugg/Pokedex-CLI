@@ -1,24 +1,24 @@
-import { api } from "../httpClient.js";
+import { getApiClient } from "../httpClient.js";
 import { formatPokemonList } from "../formatters/pokemonFormatter.js";
 import chalk from "chalk";
-import { program } from "../../index.js";
-
+import { getConfig } from "../../config/runtimeConfig.js";
+import { getSession } from "../../config/runtimeSession.js";
 
 async function addFavorite(identifier) {
-    const session = program.session
     try {
-        if(!identifier && session) {
-            if(!session.lastPokemon) {
+        const session = getSession()
+        if (!identifier && session) {
+            if (!session.lastPokemon) {
                 console.error(chalk.red.bold("No pokemon in context. Use 'get' or 'ramdom' command to see a pokemon."))
                 return
             }
             identifier = session.lastPokemon.name
         }
-
+        const api = getApiClient()
         const response = await api.post("/favorites", {
             identifier
         });
-        
+
         console.log("--------------------------------------")
         console.log(chalk.green.bold("✔ Added to favorites:"));
         console.log(chalk.yellow(`${response.data.name} (ID: ${response.data.id})`));
@@ -30,11 +30,16 @@ async function addFavorite(identifier) {
 
 async function listFavorites(options) {
     try {
+        const config = getConfig()
+        const api = getApiClient()
         const res = await api.get("/favorites");
 
-        if (options.json) {
-            console.log(JSON.stringify(res.data, null, 2));
-            return;
+        const output =
+            options.json
+                ? "json" : config.output
+        if (output === "json") {
+            console.log(JSON.stringify(res.data, null, 2))
+            return
         }
         console.log("--------------------------------------")
         console.log(chalk.yellow.bold("★ Favorite Pokémons:"));
@@ -67,7 +72,7 @@ function handleApiError(error) {
         console.error("Unexpected error:", error.message);
     }
 
-    if(!isInteractive) process.exit(1);
+    if (!isInteractive) process.exit(1);
 }
 
 export { addFavorite, listFavorites };
